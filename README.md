@@ -29,4 +29,6 @@ CSVtoTally is a modern, premium, and 100% private Progressive Web App (PWA) desi
 - Service Workers (PWA/Offline support)
 
 ## Legal
-Please refer to the internal **Privacy Policy & Disclaimer** for full terms of use. This tool is not affiliated with Tally Solutions Pvt. Ltd.
+Copyright © 2024 asr-ajay. All rights reserved. No part of this project may be copied, modified, or redistributed without permission.
+
+This tool is not affiliated with Tally Solutions Pvt. Ltd. Please refer to the [LICENSE](LICENSE) file for CC BY-NC-ND 4.0 terms.
