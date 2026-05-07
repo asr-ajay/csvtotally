@@ -142,6 +142,45 @@ document.addEventListener('DOMContentLoaded', () => {
     function parseTallyMasters(html, type) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
+        const textContent = doc.body.textContent.toLowerCase();
+        const pageTitle = (doc.title || "").toLowerCase();
+        const fullContent = (pageTitle + " " + textContent).trim();
+
+        // --- Strict Content Validation ---
+        const config = {
+            ledgers: {
+                required: ['group under', 'name of ledger', 'ledger name'],
+                forbidden: ['stock item', 'opening qty', 'item name'],
+                label: 'Ledgers'
+            },
+            vouchers: {
+                required: ['voucher type', 'vch type'],
+                forbidden: ['ledger name', 'stock item'],
+                label: 'Voucher Types'
+            },
+            items: {
+                required: ['stock item', 'opening qty'],
+                forbidden: ['group under'],
+                label: 'Stock Items'
+            },
+            units: {
+                required: ['unit', 'symbol', 'formal name'],
+                forbidden: ['group under', 'opening balance'],
+                label: 'Units'
+            }
+        };
+
+        const rule = config[type];
+        const hasRequired = rule.required.some(kw => fullContent.includes(kw));
+        const hasForbidden = rule.forbidden.some(kw => fullContent.includes(kw));
+
+        if (!hasRequired || hasForbidden || fullContent.length < 50) {
+            alert(`❌ INVALID FILE TYPE!\n\nThe file you uploaded is not a valid Tally "${rule.label}" export.\n\nExpected headers were not found, or it contains data from another category.\nPlease export the correct "${rule.label}" HTML from Tally and try again.`);
+            const input = document.getElementById(`m-${type}`);
+            if (input) input.value = '';
+            return;
+        }
+
         const rows = doc.querySelectorAll('tr');
         
         // Reset the specific master list to replace with new data
