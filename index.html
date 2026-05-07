@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSVtoTally | Excel to Tally XML Converter</title>
+    <meta name="description"
+        content="Convert your Excel/CSV files to Tally XML format instantly. Free, secure, and browser-based tool for Tally accounting import.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#10b981">
+    <!-- PapaParse for robust CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <header>
+        <nav class="container">
+            <div class="logo">
+                <span class="logo-icon">📊</span>
+                <span class="logo-text">CSV<span>toTally</span></span>
+            </div>
+            <div class="nav-links">
+                <a href="#" id="templates-btn">Templates</a>
+                <a href="#" id="help-link">Help</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <h1 class="gradient-text">CSV to Tally XML Converter</h1>
+            <p class="subtitle">Select your template type and upload your CSV.</p>
+        </section>
+
+        <section class="mode-selection">
+            <div class="mode-grid">
+                <div class="info-card">
+                    <div class="mode-icon">💳</div>
+                    <h3>Single Simple</h3>
+                    <p>One Dr/Cr per row. Fixed Voucher Type.</p>
+                </div>
+                <div class="info-card">
+                    <div class="mode-icon">🧾</div>
+                    <h3>Single Combined</h3>
+                    <p>One Dr/Cr per row. Mixed Voucher Types.</p>
+                </div>
+                <div class="info-card">
+                    <div class="mode-icon">📒</div>
+                    <h3>Multiple Simple</h3>
+                    <p>Multi Dr/Cr per voucher. Fixed Type.</p>
+                </div>
+                <div class="info-card">
+                    <div class="mode-icon">📁</div>
+                    <h3>Multiple Combined</h3>
+                    <p>Multi Dr/Cr per voucher. Mixed Types.</p>
+                </div>
+                <div class="info-card">
+                    <div class="mode-icon">📦</div>
+                    <h3>Inventory Simple</h3>
+                    <p>Sales/Purchase with Items, Taxes & Expenses.</p>
+                </div>
+                <div class="info-card">
+                    <div class="mode-icon">🚛</div>
+                    <h3>Inventory Multiple</h3>
+                    <p>Multi Items per voucher with Taxes & Expenses.</p>
+                </div>
+                <div class="info-card">
+                    <div class="mode-icon">👥</div>
+                    <h3>Create Ledger</h3>
+                    <p>Add new Ledgers with Opening Balances (Dr/Cr).</p>
+                </div>
+                <div class="info-card">
+                    <div class="mode-icon">🏷️</div>
+                    <h3>Create Stock Item</h3>
+                    <p>Add new Items with Units and Opening Stock.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="container privacy-section">
+            <div class="privacy-notice-box glass-card">
+                <div class="notice-icon">🛡️</div>
+                <div class="notice-content">
+                    <h3>Secure & Private Local Conversion</h3>
+                    <p>All processing happens directly in your browser. Your CSV files and Tally Masters are
+                        <strong>never uploaded to any server</strong>; they remain in temporary local memory only for
+                        your current session. By using this tool, you agree to our <a href="#" class="inline-privacy-trigger">Privacy Policy & Disclaimer</a>.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="config-section" class="config-section">
+            <div class="config-grid">
+                <div class="glass-card config-card">
+                    <div class="config-field">
+                        <label for="template-selector">Select Template Type:</label>
+                        <select id="template-selector" class="custom-select">
+                            <option value="single-simple">Single Simple</option>
+                            <option value="single-combined">Single Combined</option>
+                            <option value="multiple-simple">Multiple Simple</option>
+                            <option value="multiple-combined">Multiple Combined</option>
+                            <option value="inventory-simple" selected>Inventory Simple</option>
+                            <option value="inventory-multiple">Inventory Multiple</option>
+                            <option value="master-ledger">Create Ledger (Master)</option>
+                            <option value="master-item">Create Stock Item (Master)</option>
+                        </select>
+                    </div>
+
+                    <div id="simple-vch-type-container" class="config-field" style="margin-top: 1.5rem;">
+                        <label for="global-vch-type">Select Voucher type:</label>
+                        <select id="global-vch-type" class="custom-select">
+                            <option value="Journal">Journal</option>
+                            <option value="Sales">Sales</option>
+                            <option value="Purchase">Purchase</option>
+                            <option value="Payment">Payment</option>
+                            <option value="Receipt">Receipt</option>
+                            <option value="Contra">Contra</option>
+                            <option value="Credit Note">Credit Note</option>
+                            <option value="Debit Note">Debit Note</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="glass-card config-card master-grid-card">
+                    <h3>Tally Masters (HTML)</h3>
+                    <div class="master-upload-grid">
+                        <div class="master-item">
+                            <span>Ledgers</span>
+                            <button class="m-btn" onclick="document.getElementById('m-ledgers').click()">Upload</button>
+                            <input type="file" id="m-ledgers" accept=".html,.htm" hidden data-type="ledgers">
+                            <span class="m-status" id="s-ledgers">0</span>
+                        </div>
+                        <div class="master-item">
+                            <span>Voucher Types</span>
+                            <button class="m-btn"
+                                onclick="document.getElementById('m-vouchers').click()">Upload</button>
+                            <input type="file" id="m-vouchers" accept=".html,.htm" hidden data-type="vouchers">
+                            <span class="m-status" id="s-vouchers">0</span>
+                        </div>
+                        <div class="master-item">
+                            <span>Stock Items</span>
+                            <button class="m-btn" onclick="document.getElementById('m-items').click()">Upload</button>
+                            <input type="file" id="m-items" accept=".html,.htm" hidden data-type="items">
+                            <span class="m-status" id="s-items">0</span>
+                        </div>
+                        <div class="master-item">
+                            <span>Units</span>
+                            <button class="m-btn" onclick="document.getElementById('m-units').click()">Upload</button>
+                            <input type="file" id="m-units" accept=".html,.htm" hidden data-type="units">
+                            <span class="m-status" id="s-units">0</span>
+                        </div>
+                    </div>
+                    <button id="view-masters-btn" class="btn btn-outline btn-small btn-full">View All Masters</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="error-log-section" class="error-log-section hidden">
+            <div class="glass-card error-card">
+                <div class="error-header">
+                    <h2>⚠️ Validation Errors</h2>
+                    <p>The following items were not found in your Tally masters. Please fix them in your CSV or upload
+                        the missing masters.</p>
+                </div>
+                <ul id="error-list"></ul>
+                <div class="error-actions">
+                    <button id="ignore-errors-btn" class="btn btn-primary">Generate XML Anyway</button>
+                    <button id="fix-errors-btn" class="btn btn-outline">I'll fix the CSV</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="upload-section">
+            <div id="drop-zone" class="glass-card upload-box">
+                <input type="file" id="file-input" accept=".csv" hidden>
+                <div class="upload-content">
+                    <div class="upload-icon">📁</div>
+                    <h3>Drop your CSV file here</h3>
+                    <p>or click to browse from your computer</p>
+                    <span class="file-info" id="file-name">Supports .csv files in fixed format</span>
+                </div>
+            </div>
+
+            <div class="container upload-help-info">
+                <div class="help-bubble">
+                    <span class="bubble-icon">💡</span>
+                    <div class="bubble-text">
+                        <strong>CSV Guidelines:</strong> Ensure headers match the selected mode.
+                        Use the <a href="#" id="inline-help-trigger">Template Guide</a> for column requirements.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="preview-section" class="preview-section hidden">
+            <div class="glass-card">
+                <div class="card-header">
+                    <h2>Data Preview</h2>
+                    <div class="actions">
+                        <button id="convert-btn" class="btn btn-primary">Convert to XML</button>
+                        <button id="reset-btn" class="btn btn-outline">Reset</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="preview-table">
+                        <thead>
+                            <tr id="table-head"></tr>
+                        </thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="result-section" class="result-section hidden">
+            <div class="glass-card success-card">
+                <div class="success-icon">✅</div>
+                <h2>Conversion Successful!</h2>
+                <p>Your Tally-ready XML file is ready for download.</p>
+                <div class="result-actions">
+                    <button id="download-btn" class="btn btn-large btn-success">Download .xml File</button>
+                    <button id="new-conversion-btn" class="btn btn-outline">Generate Next XML</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Master Viewer Modal -->
+    <div id="master-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h2>Uploaded Masters</h2>
+                <button id="close-modal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="ledgers">Ledgers</button>
+                    <button class="tab-btn" data-tab="vouchers">Vouchers</button>
+                    <button class="tab-btn" data-tab="items">Items</button>
+                    <button class="tab-btn" data-tab="units">Units</button>
+                </div>
+                <div id="master-list-container" class="master-list-container">
+                    <div id="master-table-wrapper" class="table-container">
+                        <!-- Table will be injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal hidden">
+        <div class="modal-content glass-card help-modal-content">
+            <div class="modal-header">
+                <h2>📖 App Documentation</h2>
+                <button id="close-help-modal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body help-body">
+                <section class="help-section">
+                    <h3>🚀 Quick Start Guide</h3>
+                    <ol>
+                        <li><strong>Select Template:</strong> Use the dropdown in the configuration section to select
+                            the mode that matches your CSV structure.</li>
+                        <li><strong>Download Template:</strong> Use the "Templates" menu in the header to get the
+                            correct CSV sample for your selected mode.</li>
+                        <li><strong>Upload Masters:</strong> Export Ledgers, Voucher Types, and Stock Items from Tally
+                            as HTML and upload them for real-time validation.</li>
+                        <li><strong>Drop & Convert:</strong> Drag your prepared CSV into the upload box. The app will
+                            validate headers and show a preview.</li>
+                        <li><strong>Download XML:</strong> Click "Convert to XML" to generate a Tally-ready file.</li>
+                    </ol>
+                </section>
+
+                <section class="help-section">
+                    <h3>📋 Template Types Explained</h3>
+                    <div class="faq-item">
+                        <strong>Single Modes (Simple/Combined)</strong>
+                        <p>Best for accounting-only entries. Every row in the CSV becomes a basic ledger-to-ledger
+                            transaction.</p>
+                    </div>
+                    <div class="faq-item">
+                        <strong>Multiple Modes (Simple/Combined)</strong>
+                        <p>Uses the <em>VoucherNo</em> column to group multiple rows into a single multi-ledger voucher.
+                            Ideal for complex journals.</p>
+                    </div>
+                    <div class="faq-item">
+                        <strong>Inventory Modes (Simple/Multiple)</strong>
+                        <p>Advanced templates for Sales/Purchase. Supports Stock Items, Units, Quantities, Rates, 3 Tax
+                            columns, and 2 Expense columns. Handles both Sales and Purchases via the <em>PartyDrCr</em>
+                            column (<strong>Dr</strong> = Sales, <strong>Cr</strong> = Purchase).</p>
+                    </div>
+                    <div class="faq-item">
+                        <strong>Master Creation (Ledger/Item)</strong>
+                        <p>Used to bulk-create masters in Tally. Ledgers support Dr/Cr opening balances. Stock Items
+                            support opening quantities and values.</p>
+                    </div>
+                </section>
+
+                <section class="help-section">
+                    <h3>🛠️ Inventory Specifics</h3>
+                    <div class="faq-item">
+                        <strong>PartyDrCr column</strong>
+                        <p>Specifies the transaction direction: enter <strong>Dr</strong> for Sales or
+                            <strong>Cr</strong> for Purchase. The app automatically adjusts the XML signs and ledger
+                            mappings accordingly.
+                        </p>
+                    </div>
+                    <div class="faq-item">
+                        <strong>Tax & Expense Aggregation</strong>
+                        <p>In "Inventory Multiple" mode, if you have multiple rows with the same Voucher Number, the app
+                            will sum up all Tax and Expense amounts to create a clean, consolidated voucher in Tally.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="help-section">
+                    <h3>📁 Master Creation Guide</h3>
+                    <div class="faq-item">
+                        <strong>Bulk Ledger Creation</strong>
+                        <p>Use the <strong>Create Ledger (Master)</strong> template. Specify the <em>Parent</em> group
+                            (e.g., Sundry Creditors) and <em>DrCr</em> for opening balance. Tally will automatically
+                            create these ledgers in your company.</p>
+                    </div>
+                    <div class="faq-item">
+                        <strong>Bulk Stock Item Creation</strong>
+                        <p>Use the <strong>Create Stock Item (Master)</strong> template. Ensure you upload your
+                            <em>Units HTML</em> from Tally first, so the app can verify that the UOM (Units of Measure)
+                            exist in your Tally company before conversion.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="help-section">
+                    <h3>📥 How to Upload in Tally</h3>
+                    <div class="faq-item">
+                        <strong>For Transactions (Sales, Purchase, etc.)</strong>
+                        <ol>
+                            <li>Go to <strong>Import Data (Alt+O)</strong> > <strong>Transactions</strong>.</li>
+                            <li>Provide the path to your XML file and Enter.</li>
+                        </ol>
+                    </div>
+                    <div class="faq-item">
+                        <strong>For Masters (Ledger, Stock Item)</strong>
+                        <ol>
+                            <li>Go to <strong>Import Data (Alt+O)</strong> > <strong>Masters</strong>.</li>
+                            <li>Select <strong>Modify with new data</strong> to ensure opening balances are updated.
+                            </li>
+                            <li>Provide the path to your XML file and Enter.</li>
+                        </ol>
+                    </div>
+                </section>
+
+                <section class="help-section">
+                    <h3>📤 How do I export Masters from Tally?</h3>
+                    <ol>
+                        <li>Go to <strong>Display More Reports</strong> > <strong>Statement of Accounts</strong> >
+                            <strong>Statistics</strong>.
+                        </li>
+                        <li>On Right Side <strong>Select type of master</strong> & Enter to open.</li>
+                        <li><strong>Press F5 (Ledger View or Stock Item View)</strong> to show all details.</li>
+                        <li>Press <strong>Export (Ctrl+E)</strong>.</li>
+                        <li>Select <strong>HTML</strong> format and save the file.</li>
+                    </ol>
+                </section>
+
+                <section class="help-section">
+                    <h3>❓ FAQs & Troubleshooting</h3>
+                    <div class="faq-item">
+                        <strong>Q: Why do I get "Template Mismatch" error?</strong>
+                        <p>A: This happens if the CSV you uploaded doesn't have the columns required for the mode you
+                            selected. Double-check your mode selection or download the template again.</p>
+                    </div>
+                    <div class="faq-item">
+                        <strong>Q: How do I handle multiple items in one invoice?</strong>
+                        <p>A: Use the <strong>Inventory Multiple</strong> template. Give all items belonging to the same
+                            invoice the same <strong>VoucherNo</strong>.</p>
+                    </div>
+                    <div class="faq-item">
+                        <strong>Q: Tally says "Voucher totals do not match", what do I do?</strong>
+                        <p>A: Ensure your Item Amount + Tax + Expenses equals the total value assigned to the Party
+                            Ledger. The app calculates this automatically, so check your CSV math.</p>
+                    </div>
+                    <div class="faq-item">
+                        <strong>Q: Can I use custom Voucher Types?</strong>
+                        <p>A: Yes. Just make sure the Voucher Type name in your CSV exactly matches the name of the
+                            Voucher Type in Tally (case-insensitive).</p>
+                    </div>
+                    <div class="faq-item">
+                        <strong>Q: Is my data safe?</strong>
+                        <p>A: 100%. This is a client-side application. No data is ever uploaded to a server; everything
+                            happens locally in your browser.</p>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates Download Modal -->
+    <div id="templates-modal" class="modal hidden">
+        <div class="modal-content glass-card templates-modal-content">
+            <div class="modal-header">
+                <h2>📥 CSV Template Download Center</h2>
+                <button id="close-templates-modal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="template-tip">Select the appropriate template for your transaction type. Download the CSV,
+                    fill in your data, and upload it back for conversion.</p>
+
+                <div class="template-table-wrapper">
+                    <table class="tally-structured-table">
+                        <thead>
+                            <tr>
+                                <th>Template Category</th>
+                                <th>Name</th>
+                                <th>Description & Use Case</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Accounting -->
+                            <tr>
+                                <td rowspan="4" class="category-cell"><strong>Vouchers</strong><br><small>Accounting
+                                        Only</small></td>
+                                <td>Single Simple</td>
+                                <td>One Dr/Cr per row. Fixed voucher type for all rows.</td>
+                                <td><button class="btn btn-primary btn-small dl-btn"
+                                        data-template="single-simple">Download</button></td>
+                            </tr>
+                            <tr>
+                                <td>Single Combined</td>
+                                <td>One Dr/Cr per row. Supports different voucher types in one file.</td>
+                                <td><button class="btn btn-primary btn-small dl-btn"
+                                        data-template="single-combined">Download</button></td>
+                            </tr>
+                            <tr>
+                                <td>Multiple Simple</td>
+                                <td>Multi-ledger vouchers. Groups rows by <em>VoucherNo</em>. Fixed type.</td>
+                                <td><button class="btn btn-primary btn-small dl-btn"
+                                        data-template="multiple-simple">Download</button></td>
+                            </tr>
+                            <tr>
+                                <td>Multiple Combined</td>
+                                <td>Multi-ledger vouchers. Groups rows by <em>VoucherNo</em>. Mixed types.</td>
+                                <td><button class="btn btn-primary btn-small dl-btn"
+                                        data-template="multiple-combined">Download</button></td>
+                            </tr>
+
+                            <!-- Inventory -->
+                            <tr class="table-divider">
+                                <td rowspan="2" class="category-cell"><strong>Inventory</strong><br><small>Sales &
+                                        Purchase</small></td>
+                                <td>Inventory Simple</td>
+                                <td>Standard bill with items, 3 taxes, and 2 expense columns.</td>
+                                <td><button class="btn btn-primary btn-small dl-btn"
+                                        data-template="inventory-simple">Download</button></td>
+                            </tr>
+                            <tr>
+                                <td>Inventory Multiple</td>
+                                <td>Multi-item bills. Supports multiple stock items per invoice number.</td>
+                                <td><button class="btn btn-primary btn-small dl-btn"
+                                        data-template="inventory-multiple">Download</button></td>
+                            </tr>
+
+                            <!-- Masters -->
+                            <tr class="table-divider">
+                                <td rowspan="2" class="category-cell"><strong>Masters</strong><br><small>Bulk
+                                        Creation</small></td>
+                                <td>Create Ledger</td>
+                                <td>Bulk create ledgers with opening balances and groups.</td>
+                                <td><button class="btn btn-primary btn-small dl-btn"
+                                        data-template="master-ledger">Download</button></td>
+                            </tr>
+                            <tr>
+                                <td>Create Stock Item</td>
+                                <td>Bulk create stock items with units and opening stock.</td>
+                                <td><button class="btn btn-primary btn-small dl-btn"
+                                        data-template="master-item">Download</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer container">
+        <div class="footer-content glass-card">
+            <div class="footer-about">
+                <h3>About CSVtoTally</h3>
+                <p>CSVtoTally is a specialized productivity tool designed for accountants and business owners to
+                    streamline the data import process into TallyPrime. Our mission is to eliminate manual entry and
+                    potential human errors by providing a secure, fast, and 100% private conversion environment.</p>
+            </div>
+            <div class="footer-stats">
+                <div class="stat-item">
+                    <strong>Fast</strong>
+                    <span>Instant XML Generation</span>
+                </div>
+                <div class="stat-item">
+                    <strong>Secure</strong>
+                    <span>Local-Only Processing</span>
+                </div>
+                <div class="stat-item">
+                    <strong>Accurate</strong>
+                    <span>Tally Schema Validated</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; <span id="current-year">2024</span> CSVtoTally. Developed with ❤️ for the Accounting Community.</p>
+            <div class="footer-links" style="margin-top: 0.5rem; font-size: 0.8rem;">
+                <a href="#" id="privacy-link" style="color: var(--text-muted); text-decoration: none; margin: 0 0.5rem;">Privacy Policy</a> | 
+                <a href="#" id="disclaimer-link" style="color: var(--text-muted); text-decoration: none; margin: 0 0.5rem;">Disclaimer</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Privacy & Disclaimer Modal -->
+    <div id="privacy-modal" class="modal hidden">
+        <div class="modal-content glass-card help-modal-content">
+            <div class="modal-header">
+                <h2>⚖️ Privacy Policy & Disclaimer</h2>
+                <button id="close-privacy-modal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body help-body">
+                <section class="help-section">
+                    <h3>🛡️ Privacy Policy</h3>
+                    <div class="faq-item">
+                        <strong>100% Client-Side Processing</strong>
+                        <p>CSVtoTally is designed with privacy as its core principle. Unlike other converters, all data processing—parsing your CSV, validating against your Tally masters, and generating the final XML—happens <strong>entirely within your web browser</strong>.</p>
+                    </div>
+                    <div class="faq-item">
+                        <strong>No Data Uploads</strong>
+                        <p>Your financial data, ledger names, and voucher details are <strong>never transmitted to any server</strong>. We do not have access to your files, nor do we store any of your data on our systems.</p>
+                    </div>
+                    <div class="faq-item">
+                        <strong>Local Storage Usage</strong>
+                        <p>We use your browser's <code>sessionStorage</code> to temporarily remember your uploaded Tally Masters (Ledgers, Items, etc.) so you don't have to re-upload them if you refresh the page. This data is cleared when you close your browser tab.</p>
+                    </div>
+                    <div class="faq-item">
+                        <strong>External Resources</strong>
+                        <p>This app loads <em>Google Fonts</em> for typography and <em>PapaParse</em> (via CDN) for CSV handling. These external services do not receive any of the data you process within the app.</p>
+                    </div>
+                </section>
+
+                <section class="help-section">
+                    <h3>⚠️ Disclaimer</h3>
+                    <div class="faq-item">
+                        <strong>User Responsibility</strong>
+                        <p>CSVtoTally is a productivity tool provided "as is". While we have made every effort to ensure the accuracy of the XML generation logic based on standard TallyPrime requirements, the final responsibility for data accuracy lies with the user.</p>
+                    </div>
+                    <div class="faq-item">
+                        <strong>Verify Before Import</strong>
+                        <p>We strongly recommend that you <strong>verify the generated XML data</strong> and test imports in a "Dummy" company in Tally before importing into your live accounting data.</p>
+                    </div>
+                    <div class="faq-item">
+                        <strong>No Affiliation</strong>
+                        <p>CSVtoTally is an independent tool and is <strong>not affiliated, associated, authorized, endorsed by, or in any way officially connected</strong> with Tally Solutions Pvt. Ltd. "Tally" and "TallyPrime" are registered trademarks of Tally Solutions Pvt. Ltd.</p>
+                    </div>
+                    <div class="faq-item">
+                        <strong>Limitation of Liability</strong>
+                        <p>In no event shall the developers of CSVtoTally be liable for any direct, indirect, incidental, or consequential damages (including, but not limited to, loss of data or accounting errors) arising out of the use or inability to use this tool.</p>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
