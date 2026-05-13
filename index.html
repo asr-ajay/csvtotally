@@ -97,7 +97,8 @@
                     <h3>Secure & Private Local Conversion</h3>
                     <p>All processing happens directly in your browser. Your CSV files and Tally Masters are
                         <strong>never uploaded to any server</strong>; they remain in temporary local memory only for
-                        your current session. By using this tool, you agree to our <a href="#" class="inline-privacy-trigger">Privacy Policy & Disclaimer</a>.
+                        your current session. By using this tool, you agree to our <a href="#"
+                            class="inline-privacy-trigger">Privacy Policy & Disclaimer</a>.
                     </p>
                 </div>
             </div>
@@ -133,6 +134,7 @@
                             <option value="Debit Note">Debit Note</option>
                         </select>
                     </div>
+
                 </div>
 
                 <div class="glass-card config-card master-grid-card">
@@ -317,6 +319,14 @@
                         <p>Specifies the transaction direction: enter <strong>Dr</strong> for Sales or
                             <strong>Cr</strong> for Purchase. The app automatically adjusts the XML signs and ledger
                             mappings accordingly.
+                        </p>
+                    </div>
+                    <div class="faq-item">
+                        <strong>Tax & Expense Dr/Cr columns</strong>
+                        <p>You can manually specify the direction for each tax and expense ledger using the
+                            <strong>TaxDrCr</strong> and <strong>ExpDrCr</strong> columns. If left empty, the app
+                            automatically assigns the opposite direction of the Party (e.g., if Party is Dr, Tax/Exp is
+                            Cr).
                         </p>
                     </div>
                     <div class="faq-item">
@@ -521,10 +531,13 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; <span id="current-year">2024</span> CSVtoTally. Developed with ❤️ for the Accounting Community.</p>
+            <p>&copy; <span id="current-year">2024</span> CSVtoTally. Developed with ❤️ for the Accounting Community.
+            </p>
             <div class="footer-links" style="margin-top: 0.5rem; font-size: 0.8rem;">
-                <a href="#" id="privacy-link" style="color: var(--text-muted); text-decoration: none; margin: 0 0.5rem;">Privacy Policy</a> | 
-                <a href="#" id="disclaimer-link" style="color: var(--text-muted); text-decoration: none; margin: 0 0.5rem;">Disclaimer</a>
+                <a href="#" id="privacy-link"
+                    style="color: var(--text-muted); text-decoration: none; margin: 0 0.5rem;">Privacy Policy</a> |
+                <a href="#" id="disclaimer-link"
+                    style="color: var(--text-muted); text-decoration: none; margin: 0 0.5rem;">Disclaimer</a>
             </div>
         </div>
     </footer>
@@ -541,19 +554,27 @@
                     <h3>🛡️ Privacy Policy</h3>
                     <div class="faq-item">
                         <strong>100% Client-Side Processing</strong>
-                        <p>CSVtoTally is designed with privacy as its core principle. Unlike other converters, all data processing—parsing your CSV, validating against your Tally masters, and generating the final XML—happens <strong>entirely within your web browser</strong>.</p>
+                        <p>CSVtoTally is designed with privacy as its core principle. Unlike other converters, all data
+                            processing—parsing your CSV, validating against your Tally masters, and generating the final
+                            XML—happens <strong>entirely within your web browser</strong>.</p>
                     </div>
                     <div class="faq-item">
                         <strong>No Data Uploads</strong>
-                        <p>Your financial data, ledger names, and voucher details are <strong>never transmitted to any server</strong>. We do not have access to your files, nor do we store any of your data on our systems.</p>
+                        <p>Your financial data, ledger names, and voucher details are <strong>never transmitted to any
+                                server</strong>. We do not have access to your files, nor do we store any of your data
+                            on our systems.</p>
                     </div>
                     <div class="faq-item">
                         <strong>Local Storage Usage</strong>
-                        <p>We use your browser's <code>sessionStorage</code> to temporarily remember your uploaded Tally Masters (Ledgers, Items, etc.) so you don't have to re-upload them if you refresh the page. This data is cleared when you close your browser tab.</p>
+                        <p>We use your browser's <code>sessionStorage</code> to temporarily remember your uploaded Tally
+                            Masters (Ledgers, Items, etc.) so you don't have to re-upload them if you refresh the page.
+                            This data is cleared when you close your browser tab.</p>
                     </div>
                     <div class="faq-item">
                         <strong>External Resources</strong>
-                        <p>This app loads <em>Google Fonts</em> for typography and <em>PapaParse</em> (via CDN) for CSV handling. These external services do not receive any of the data you process within the app.</p>
+                        <p>This app loads <em>Google Fonts</em> for typography and <em>PapaParse</em> (via CDN) for CSV
+                            handling. These external services do not receive any of the data you process within the app.
+                        </p>
                     </div>
                 </section>
 
@@ -561,19 +582,26 @@
                     <h3>⚠️ Disclaimer</h3>
                     <div class="faq-item">
                         <strong>User Responsibility</strong>
-                        <p>CSVtoTally is a productivity tool provided "as is". While we have made every effort to ensure the accuracy of the XML generation logic based on standard TallyPrime requirements, the final responsibility for data accuracy lies with the user.</p>
+                        <p>CSVtoTally is a productivity tool provided "as is". While we have made every effort to ensure
+                            the accuracy of the XML generation logic based on standard TallyPrime requirements, the
+                            final responsibility for data accuracy lies with the user.</p>
                     </div>
                     <div class="faq-item">
                         <strong>Verify Before Import</strong>
-                        <p>We strongly recommend that you <strong>verify the generated XML data</strong> and test imports in a "Dummy" company in Tally before importing into your live accounting data.</p>
+                        <p>We strongly recommend that you <strong>verify the generated XML data</strong> and test
+                            imports in a "Dummy" company in Tally before importing into your live accounting data.</p>
                     </div>
                     <div class="faq-item">
                         <strong>No Affiliation</strong>
-                        <p>CSVtoTally is an independent tool and is <strong>not affiliated, associated, authorized, endorsed by, or in any way officially connected</strong> with Tally Solutions Pvt. Ltd. "Tally" and "TallyPrime" are registered trademarks of Tally Solutions Pvt. Ltd.</p>
+                        <p>CSVtoTally is an independent tool and is <strong>not affiliated, associated, authorized,
+                                endorsed by, or in any way officially connected</strong> with Tally Solutions Pvt. Ltd.
+                            "Tally" and "TallyPrime" are registered trademarks of Tally Solutions Pvt. Ltd.</p>
                     </div>
                     <div class="faq-item">
                         <strong>Limitation of Liability</strong>
-                        <p>In no event shall the developers of CSVtoTally be liable for any direct, indirect, incidental, or consequential damages (including, but not limited to, loss of data or accounting errors) arising out of the use or inability to use this tool.</p>
+                        <p>In no event shall the developers of CSVtoTally be liable for any direct, indirect,
+                            incidental, or consequential damages (including, but not limited to, loss of data or
+                            accounting errors) arising out of the use or inability to use this tool.</p>
                     </div>
                 </section>
             </div>

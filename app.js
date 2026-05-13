@@ -87,8 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'single-combined': "Date,VoucherType,DebitLedger,CreditLedger,Amount,Narration\n01-04-2024,Sales,HDFC Bank,Sales Account,15000.00,Being sales\n02-04-2024,Payment,Rent,Cash,5000.00,Office rent",
         'multiple-simple': "VoucherNo,Date,Narration,LedgerName1,Amount1,DrCr1,LedgerName2,Amount2,DrCr2,LedgerName3,Amount3,DrCr3\n1,01-04-2024,Multiple entry,Customer A,10000.00,Dr,Sales,10000.00,Cr,,,\n2,02-04-2024,Cash Sales,Cash,5000.00,Dr,Sales,5000.00,Cr,,,",
         'multiple-combined': "VoucherNo,Date,VoucherType,Narration,LedgerName1,Amount1,DrCr1,LedgerName2,Amount2,DrCr2,LedgerName3,Amount3,DrCr3\n1,01-04-2024,Sales,Multiple entry,Customer A,10000.00,Dr,Sales,10000.00,Cr,,,\n2,02-04-2024,Receipt,Payment recd,HDFC Bank,5000.00,Dr,Customer B,5000.00,Cr,,,",
-        'inventory-simple': "Date,VoucherType,VoucherNo,PartyLedger,PartyDrCr,ItemLedger,StockItem,Qty,Rate,Unit,Amount,TaxLedger1,TaxAmt1,TaxLedger2,TaxAmt2,TaxLedger3,TaxAmt3,ExpLedger1,ExpAmt1,ExpLedger2,ExpAmt2,Narration\n01-04-2024,Sales,1,Customer A,Dr,Sales Account,Laptop,10,25000,Nos,250000,Output IGST,45000,,,,,Freight,500,,,Being items sold",
-        'inventory-multiple': "VoucherNo,Date,VoucherType,PartyLedger,PartyDrCr,ItemLedger,StockItem,Qty,Rate,Unit,Amount,TaxLedger1,TaxAmt1,TaxLedger2,TaxAmt2,TaxLedger3,TaxAmt3,ExpLedger1,ExpAmt1,ExpLedger2,ExpAmt2,Narration\n1,01-04-2024,Sales,Customer A,Dr,Sales Account,Laptop,2,25000,Nos,50000,Output IGST,9000,,,,,Freight,100,,,Bulk Sale\n1,01-04-2024,Sales,Customer A,Dr,Sales Account,Mouse,5,500,Nos,2500,Output IGST,450,,,,,Freight,20,,,Bulk Sale",
+        'inventory-simple': "Date,VoucherType,VoucherNo,PartyLedger,PartyDrCr,ItemLedger,StockItem,Qty,Rate,Unit,Amount,TaxLedger1,TaxAmt1,TaxDrCr1,TaxLedger2,TaxAmt2,TaxDrCr2,TaxLedger3,TaxAmt3,TaxDrCr3,ExpLedger1,ExpAmt1,ExpDrCr1,ExpLedger2,ExpAmt2,ExpDrCr2,Narration\n01-04-2024,Sales,1,Customer A,Dr,Sales Account,Laptop,10,25000,Nos,250000,Output IGST,45000,Cr,,,,,,,Freight,500,Cr,,,,Being items sold",
+        'inventory-multiple': "VoucherNo,Date,VoucherType,PartyLedger,PartyDrCr,ItemLedger,StockItem,Qty,Rate,Unit,Amount,TaxLedger1,TaxAmt1,TaxDrCr1,TaxLedger2,TaxAmt2,TaxDrCr2,TaxLedger3,TaxAmt3,TaxDrCr3,ExpLedger1,ExpAmt1,ExpDrCr1,ExpLedger2,ExpAmt2,ExpDrCr2,Narration\n1,01-04-2024,Sales,Customer A,Dr,Sales Account,Laptop,2,25000,Nos,50000,Output IGST,9000,Cr,,,,,,,Freight,100,Cr,,,,Bulk Sale\n1,01-04-2024,Sales,Customer A,Dr,Sales Account,Mouse,5,500,Nos,2500,Output IGST,450,Cr,,,,,,,Freight,20,Cr,,,,Bulk Sale",
         'master-ledger': "Name,Parent,OpeningBalance,DrCr\nCustomer A,Sundry Debtors,1000,Dr\nBank Loan,Secured Loans,50000,Cr",
         'master-item': "Name,Parent,Unit,OpeningQty,OpeningValue\nLaptop,Electronics,Nos,10,250000\nMouse,Electronics,Nos,20,10000"
     };
@@ -109,9 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!simpleVchContainer || !globalVchSelect) return;
         
         // Disable if it's a Combined template, Inventory template, or Master creation
-        const isDisabled = activeMode.includes('combined') || activeMode.includes('inventory') || activeMode.includes('master');
+        const isCombinedOrInventoryOrMaster = activeMode.includes('combined') || activeMode.includes('inventory') || activeMode.includes('master');
         
-        if (!isDisabled) {
+        if (!isCombinedOrInventoryOrMaster) {
             simpleVchContainer.style.opacity = '1';
             simpleVchContainer.style.pointerEvents = 'all';
             simpleVchContainer.classList.remove('disabled-config');
@@ -262,14 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
         closeTemplatesModal.addEventListener('click', () => templatesModal.classList.add('hidden'));
     }
 
-    // Handle template downloads inside modal
-    document.querySelectorAll('.dl-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const type = btn.dataset.template;
-            downloadTemplate(type);
-            templatesModal.classList.add('hidden');
-        });
-    });
+
     
     const inlineHelpTrigger = document.getElementById('inline-help-trigger');
     if (inlineHelpTrigger) {
@@ -420,14 +413,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Template Download ---
+    function downloadTemplate(type) {
+        const content = templates[type];
+        if (!content) return;
+        const blob = new Blob([content], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `template_${type}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
     templateLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            const content = templates[link.dataset.template];
-            const blob = new Blob([content], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `template_${link.dataset.template}.csv`; a.click();
-            window.URL.revokeObjectURL(url);
+            downloadTemplate(link.dataset.template);
+            if (templatesModal) templatesModal.classList.add('hidden');
         });
     });
 
@@ -731,6 +733,10 @@ document.addEventListener('DOMContentLoaded', () => {
             let totalItemAmount = 0;
             const taxEntries = {}; // ledgerName -> amount
             const expEntries = {}; // ledgerName -> amount
+            
+            // Map to store Dr/Cr for aggregated ledgers
+            const taxDrCrMap = {};
+            const expDrCrMap = {};
 
             rows.forEach(r => {
                 const itemAmt = parseFloat((r.Amount || '0').toString().replace(/[^0-9\.-]+/g,""));
@@ -740,23 +746,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (let i = 1; i <= 3; i++) {
                     const lName = r[`TaxLedger${i}`];
                     const lAmt = parseFloat((r[`TaxAmt${i}`] || '0').toString().replace(/[^0-9\.-]+/g,""));
+                    const rowDrCr = (r[`TaxDrCr${i}`] || '').trim().toLowerCase();
+                    
                     if (lName && !isNaN(lAmt) && lAmt !== 0) {
                         taxEntries[lName] = (taxEntries[lName] || 0) + lAmt;
+                        
+                        // Set DrCr for this ledger: use row value if present, else auto
+                        if (rowDrCr) {
+                            taxDrCrMap[lName] = rowDrCr.startsWith('d') || rowDrCr === 'yes';
+                        } else if (taxDrCrMap[lName] === undefined) {
+                            taxDrCrMap[lName] = !isPartyDr; // Default: opposite of party
+                        }
                     }
                 }
                 // Aggregate Expenses (2 columns)
                 for (let i = 1; i <= 2; i++) {
                     const lName = r[`ExpLedger${i}`];
                     const lAmt = parseFloat((r[`ExpAmt${i}`] || '0').toString().replace(/[^0-9\.-]+/g,""));
+                    const rowDrCr = (r[`ExpDrCr${i}`] || '').trim().toLowerCase();
+                    
                     if (lName && !isNaN(lAmt) && lAmt !== 0) {
                         expEntries[lName] = (expEntries[lName] || 0) + lAmt;
+                        
+                        // Set DrCr for this ledger
+                        if (rowDrCr) {
+                            expDrCrMap[lName] = rowDrCr.startsWith('d') || rowDrCr === 'yes';
+                        } else if (expDrCrMap[lName] === undefined) {
+                            expDrCrMap[lName] = !isPartyDr; // Default: opposite of party
+                        }
                     }
                 }
             });
 
-            const totalTaxAmount = Object.values(taxEntries).reduce((a, b) => a + b, 0);
-            const totalExpAmount = Object.values(expEntries).reduce((a, b) => a + b, 0);
-            const grandTotal = totalItemAmount + totalTaxAmount + totalExpAmount;
+            // Calculate adjusted grand total based on directions
+            let adjustedGrandTotal = totalItemAmount;
+            
+            Object.keys(taxEntries).forEach(lName => {
+                const amt = taxEntries[lName];
+                const isTaxDr = taxDrCrMap[lName];
+                if (isTaxDr === isPartyDr) adjustedGrandTotal -= amt;
+                else adjustedGrandTotal += amt;
+            });
+            
+            Object.keys(expEntries).forEach(lName => {
+                const amt = expEntries[lName];
+                const isExpDr = expDrCrMap[lName];
+                if (isExpDr === isPartyDr) adjustedGrandTotal -= amt;
+                else adjustedGrandTotal += amt;
+            });
 
             xml += `
                 <TALLYMESSAGE xmlns:UDF="TallyUDF">
@@ -770,7 +807,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <LEDGERENTRIES.LIST>
                             <LEDGERNAME>${partyLedger}</LEDGERNAME>
                             <ISDEEMEDPOSITIVE>${isPartyDr ? 'Yes' : 'No'}</ISDEEMEDPOSITIVE>
-                            <AMOUNT>${isPartyDr ? '-' : ''}${grandTotal.toFixed(2)}</AMOUNT>
+                            <AMOUNT>${isPartyDr ? '-' : ''}${adjustedGrandTotal.toFixed(2)}</AMOUNT>
                         </LEDGERENTRIES.LIST>`;
 
             // Inventory Entries
@@ -802,22 +839,24 @@ document.addEventListener('DOMContentLoaded', () => {
             // Additional Ledgers (Taxes)
             Object.keys(taxEntries).forEach(lName => {
                 const amt = taxEntries[lName];
+                const isTaxDr = taxDrCrMap[lName];
                 xml += `
                         <LEDGERENTRIES.LIST>
                             <LEDGERNAME>${escapeXml(lName)}</LEDGERNAME>
-                            <ISDEEMEDPOSITIVE>${isPartyDr ? 'No' : 'Yes'}</ISDEEMEDPOSITIVE>
-                            <AMOUNT>${isPartyDr ? '' : '-'}${amt.toFixed(2)}</AMOUNT>
+                            <ISDEEMEDPOSITIVE>${isTaxDr ? 'Yes' : 'No'}</ISDEEMEDPOSITIVE>
+                            <AMOUNT>${isTaxDr ? '-' : ''}${amt.toFixed(2)}</AMOUNT>
                         </LEDGERENTRIES.LIST>`;
             });
 
             // Additional Ledgers (Expenses)
             Object.keys(expEntries).forEach(lName => {
                 const amt = expEntries[lName];
+                const isExpDr = expDrCrMap[lName];
                 xml += `
                         <LEDGERENTRIES.LIST>
                             <LEDGERNAME>${escapeXml(lName)}</LEDGERNAME>
-                            <ISDEEMEDPOSITIVE>${isPartyDr ? 'No' : 'Yes'}</ISDEEMEDPOSITIVE>
-                            <AMOUNT>${isPartyDr ? '' : '-'}${amt.toFixed(2)}</AMOUNT>
+                            <ISDEEMEDPOSITIVE>${isExpDr ? 'Yes' : 'No'}</ISDEEMEDPOSITIVE>
+                            <AMOUNT>${isExpDr ? '-' : ''}${amt.toFixed(2)}</AMOUNT>
                         </LEDGERENTRIES.LIST>`;
             });
 
@@ -933,7 +972,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Register Service Worker for PWA
-if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
             .then(reg => console.log('Service Worker registered', reg))
